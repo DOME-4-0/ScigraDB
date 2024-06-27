@@ -17,8 +17,20 @@ class Scigra:
 
         """
 
-    def __init__(self):
+    def __init__(self, my_binding):
+        
+        if my_binding is None:
+            my_binding = ['s', 'p', 'o']
+        
+        # Ensure my_binding has the correct format
+        if len(my_binding) != 3:
+            raise ValueError("my_binding must be a list of three elements: ['subj', 'pred', 'obj']")
+        
         self.g = Graph()
+        self.s = my_binding[0]
+        self.p = my_binding[1]
+        self.o = my_binding[2]
+
 
     def safe_uri(self, value):
         # Warning does not handle blank nodes properly yet, needs some huristics, ex name as _: or b...
@@ -110,22 +122,22 @@ class ScigraDB:
         assumes also use of subject predicate object as bindings
         """
         for result in self.results_json["results"]["bindings"]:
-            s_value = result["subject"]["value"]
-            p_value = result["predicate"]["value"]
-            o_value = result["object"]["value"]
+            s_value = result[self.s]["value"]
+            p_value = result[self.p]["value"]
+            o_value = result[self.o]["value"]
 
-            s = BNode(s_value) if result["subject"]["type"] == "bnode" else URIRef(s_value)
+            s = BNode(s_value) if result[self.s]["type"] == "bnode" else URIRef(s_value)
             p = URIRef(p_value)
 
-            if result["object"]["type"] == "bnode":
+            if result[self.o]["type"] == "bnode":
                 o = BNode(o_value)
-            elif result["object"]["type"] == "uri":
+            elif result[self.o]["type"] == "uri":
                 o = URIRef(o_value)
-            elif result["object"]["type"] == "literal":
-                if "datatype" in result["object"]:
-                    o = Literal(o_value, datatype=URIRef(result["object"]["datatype"]))
-                elif "xml:lang" in result["object"]:
-                    o = Literal(o_value, lang=result["object"]["xml:lang"])
+            elif result[self.o]["type"] == "literal":
+                if "datatype" in result[self.o]:
+                    o = Literal(o_value, datatype=URIRef(result[self.o]["datatype"]))
+                elif "xml:lang" in result[self.o]:
+                    o = Literal(o_value, lang=result[self.o]["xml:lang"])
                 else:
                     o = Literal(o_value)
             else:

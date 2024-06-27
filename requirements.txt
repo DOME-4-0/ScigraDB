@@ -1,0 +1,7 @@
+fastapi
+httpx
+hypercorn
+pydantic
+requests
+rdflib
+SPARQLWrapper

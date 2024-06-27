@@ -17,20 +17,10 @@ class Scigra:
 
         """
 
-    def __init__(self, my_binding):
-        
-        if my_binding is None:
-            my_binding = ['s', 'p', 'o']
-        
-        # Ensure my_binding has the correct format
-        if len(my_binding) != 3:
-            raise ValueError("my_binding must be a list of three elements: ['subj', 'pred', 'obj']")
-        
+    def __init__(self):
+            
         self.g = Graph()
-        self.s = my_binding[0]
-        self.p = my_binding[1]
-        self.o = my_binding[2]
-
+ 
 
     def safe_uri(self, value):
         # Warning does not handle blank nodes properly yet, needs some huristics, ex name as _: or b...
@@ -96,13 +86,21 @@ class ScigraDB:
     Note: Server is hardcoded, but should not be.
     """
 
-    def __init__(self, q=None):
+    def __init__(self, my_binding = ['s', 'p', 'o'], q=None, qep="http://fuseki:3030/dataset/sparql"):
         """
         define server, graph, json, etc, some book keeping...initialise scigraph ...
         """
         self.results_json = None
         self.query = q
         self._graph = Graph()  # should be class Scigra
+        self.qep = qep
+            
+        if len(my_binding) != 3:
+            raise ValueError("my_binding must be a list of three elements: ['subj', 'pred', 'obj']")
+        
+        self.s = my_binding[0]
+        self.p = my_binding[1]
+        self.o = my_binding[2]
 
     def run_query(self):
         """
@@ -110,7 +108,7 @@ class ScigraDB:
         """
         if self.query == None:
             raise TypeError("please provide query! self.q=...")
-        sparql = SPARQLWrapper(f"http://fuseki:3030/dataset/sparql")
+        sparql = SPARQLWrapper(self.qep)
         sparql.setQuery(self.query)
         sparql.setReturnFormat(JSON)
         results = sparql.query().convert()
